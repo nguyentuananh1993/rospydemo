@@ -1,8 +1,5 @@
 import socket
-import cv2
-import numpy
 import sys
-import threading
 try:
     import tty, termios
 except ImportError:
@@ -32,34 +29,19 @@ else:
         try:
             tty.setraw(fd)
             ch = sys.stdin.read(1)
+        except KeyboardInterrupt:
+        	sys.exit()
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-def client(cli):
-	TCP_IP = cli
-	TCP_PORT = 8002
-	sock = socket.socket()
-	capture = cv2.VideoCapture(0)
-	ret, frame = capture.read()
-	sock.connect((TCP_IP, TCP_PORT))
-	encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),90]
-	while ret:
-	    result, imgencode = cv2.imencode('.jpg', frame, encode_param)
-	    data = numpy.array(imgencode)
-	    stringData = data.tostring()
-	    sock.send( str(len(stringData)).ljust(16));
-	    sock.send( stringData );
-	    ret, frame = capture.read()
-	    decimg=cv2.imdecode(data,1)
-	    cv2.imshow('CLIENT',decimg)
-	    cv2.waitKey(10)
-	sock.close()
-	cv2.destroyAllWindows() 
-
-def sendRequest(title):
-	while(1):
-		print "hello world"
-
-if __name__ == '__main__':	
-	client('192.168.0.100')
+TCP_IP = '127.0.0.1'
+TCP_PORT = 8003
+socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+socket.connect((TCP_IP, TCP_PORT))
+while 1:
+	a = getch()
+	socket.send(a)
+	if a=='q':
+		break;
+socket.close()

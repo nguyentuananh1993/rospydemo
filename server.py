@@ -9,10 +9,10 @@ def recvall(sock, count):
         buf += newbuf
         count -= len(newbuf)
     return buf
-TCP_IP = 'localhost'
+TCP_IP = ''
 TCP_PORT = 8002
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("127.0.0.1", TCP_PORT))
+s.bind((TCP_IP, TCP_PORT))
 s.listen(True)
 conn, addr = s.accept()
 while 1:
