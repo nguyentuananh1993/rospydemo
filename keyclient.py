@@ -35,7 +35,7 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-TCP_IP = '127.0.0.1'
+TCP_IP = '192.168.0.100'
 TCP_PORT = 8003
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.connect((TCP_IP, TCP_PORT))

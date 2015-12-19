@@ -3,6 +3,7 @@ import cv2
 import numpy
 import sys
 import threading
+threadLock=threading.Lock()
 try:
     import tty, termios
 except ImportError:
@@ -51,16 +52,19 @@ def client(cli):
 	    sock.send( str(len(stringData)).ljust(16));
 	    sock.send( stringData );
 	    ret, frame = capture.read()
-	    decimg=cv2.imdecode(data,1)
-	    cv2.imshow('CLIENT',decimg)
+	    # decimg=cv2.imdecode(data,1)
+	    # cv2.imshow('CLIENT',decimg)
 	    # cv2.waitKey(10)
 	sock.close()
 	cv2.destroyAllWindows() 
-
 def sendRequest(title):
 	while(1):
-		print "hello world"
-
-if __name__ == '__main__':	
-    thread.start_new_thread( client, ('127.0.0.1', ) )
-    thread.start_new_thread( client, ('127.0.0.1', ) )
+		a = getch()
+		print a
+threads = []
+t = threading.Thread(target=client, args=("127.0.0.1",))
+threads.append(t)
+t.start()
+t = threading.Thread(target=sendRequest, args=("127.0.0.1",))
+threads.append(t)
+t.start()
