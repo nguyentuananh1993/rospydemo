@@ -70,13 +70,15 @@ def makeRequest(cli, port=8003):
 		a = getch()
 		sock.send(a)
 		if a=='n':
-			break;
+			sys.exit()
 	sock.close()
-threads = []
-t = threading.Thread(target=makeVideoRequest, args=("192.168.1.102",))
-threads.append(t)
-t.start()
-t = threading.Thread(target=makeRequest, args=("192.168.1.102",))
-threads.append(t)
-t.start()
-# makeRequest('192.168.1.102',)
+if __name__ == '__main__':
+	print 'Move by using w,a,s,d. press n to close.'
+	threads = []
+	t = threading.Thread(target=makeVideoRequest, args=("192.168.1.102",))
+	t.setDaemon(True)
+	threads.append(t)
+	t.start()
+	t = threading.Thread(target=makeRequest, args=("192.168.1.102",))
+	threads.append(t)
+	t.start()
