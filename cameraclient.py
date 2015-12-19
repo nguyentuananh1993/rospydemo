@@ -36,9 +36,9 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-def client(cli):
+def client(cli, port=8002):
 	TCP_IP = cli
-	TCP_PORT = 8002
+	TCP_PORT = port
 	sock = socket.socket()
 	capture = cv2.VideoCapture(1)
 	ret, frame = capture.read()
@@ -62,5 +62,4 @@ def sendRequest(title):
 		print "hello world"
 
 if __name__ == '__main__':	
-    thread.start_new_thread( client, ('127.0.0.1', ) )
-    thread.start_new_thread( client, ('127.0.0.1', ) )
+    client('127.0.0.1',)
