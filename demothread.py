@@ -1,9 +1,12 @@
+
+
 import socket
 import cv2
 import numpy
 import sys
 import threading
-threadLock=threading.Lock()
+
+
 try:
     import tty, termios
 except ImportError:
@@ -37,11 +40,11 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-def client(cli):
+def makeVideoRequest(cli, port=8002):
 	TCP_IP = cli
-	TCP_PORT = 8002
+	TCP_PORT = port
 	sock = socket.socket()
-	capture = cv2.VideoCapture(1)
+	capture = cv2.VideoCapture(0)
 	ret, frame = capture.read()
 	sock.connect((TCP_IP, TCP_PORT))
 	encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),90]
@@ -52,19 +55,28 @@ def client(cli):
 	    sock.send( str(len(stringData)).ljust(16));
 	    sock.send( stringData );
 	    ret, frame = capture.read()
-	    # decimg=cv2.imdecode(data,1)
-	    # cv2.imshow('CLIENT',decimg)
-	    # cv2.waitKey(10)
+	    decimg=cv2.imdecode(data,1)
+	    cv2.imshow('CLIENT',decimg)
+	    cv2.waitKey(10)
 	sock.close()
 	cv2.destroyAllWindows() 
-def sendRequest(title):
-	while(1):
+
+def makeRequest(cli, port=8003):
+	TCP_IP = cli
+	TCP_PORT = port
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((TCP_IP, TCP_PORT))
+	while 1:
 		a = getch()
-		print a
+		sock.send(a)
+		if a=='n':
+			break;
+	sock.close()
 threads = []
-t = threading.Thread(target=client, args=("127.0.0.1",))
+t = threading.Thread(target=makeVideoRequest, args=("192.168.1.102",))
 threads.append(t)
 t.start()
-t = threading.Thread(target=sendRequest, args=("127.0.0.1",))
+t = threading.Thread(target=makeRequest, args=("192.168.1.102",))
 threads.append(t)
 t.start()
+# makeRequest('192.168.1.102',)
