@@ -31,7 +31,7 @@ else:
         old_settings = termios.tcgetattr(fd)
         try:
             tty.setraw(fd)
-            ch = sys.stdin.read(1)
+            ch = sys.stdin.read(0)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
@@ -39,22 +39,22 @@ else:
 def client(cli, port=8002):
 	TCP_IP = cli
 	TCP_PORT = port
-	sock = socket.socket()
-	capture = cv2.VideoCapture(1)
+	#sock = socket.socket()
+	capture = cv2.VideoCapture(0)
 	ret, frame = capture.read()
-	sock.connect((TCP_IP, TCP_PORT))
+	#sock.connect((TCP_IP, TCP_PORT))
 	encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),90]
 	while ret:
 	    result, imgencode = cv2.imencode('.jpg', frame, encode_param)
 	    data = numpy.array(imgencode)
 	    stringData = data.tostring()
-	    sock.send( str(len(stringData)).ljust(16));
-	    sock.send( stringData );
+	    #sock.send( str(len(stringData)).ljust(16));
+	    #sock.send( stringData );
 	    ret, frame = capture.read()
 	    decimg=cv2.imdecode(data,1)
 	    cv2.imshow('CLIENT',decimg)
-	    # cv2.waitKey(10)
-	sock.close()
+	    cv2.waitKey(10)
+	#sock.close()
 	cv2.destroyAllWindows() 
 
 def sendRequest(title):
