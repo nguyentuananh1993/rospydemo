@@ -2,6 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
+from kobuki_msgs.msg import MotorPower
 import sys
 import threading
 import socket
@@ -9,6 +10,8 @@ import subprocess
 import os
 import numpy
 import cv2
+import select
+
 
 x_speed = 0.2
 
@@ -57,18 +60,22 @@ def controlGet(cli = '', port = 8003):
     s.listen(True)
     while 1:
         conn, addr = s.accept()
-
+        print 'client '+str(addr)+' just entered.'
         rospy.init_node('move')
         p = rospy.Publisher('/mobile_base/commands/velocity', Twist,queue_size = 10)
-        print 'connect from ' + addr
-        # print "w a s d or arrow quit press n"
+        flag = 0
         while(1):    
+            flag =0
             twist = Twist()
             twist.linear.x = 0;                   # our forward speed
             twist.linear.y = 0; twist.linear.z = 0;     # we can't use these!        
             twist.angular.x = 0; twist.angular.y = 0;   #          or these!
             twist.angular.z = 0;                        # no rotation
-            mess = conn.recv(1024)
+            try:
+                mess = conn.recv(1024)
+            except:
+                print 'client auto close adds:' + str(addr)
+                break
             if mess == 'w':
                 twist.linear.x = x_speed
             elif mess == 's':
@@ -80,12 +87,16 @@ def controlGet(cli = '', port = 8003):
             elif mess == 'e':
                 sys.exit()
             else:
-                print 'Keep calm down and press slow!'
-            p.publish(twist)
-            rospy.sleep(0.1) 
-            twist = Twist()
-            p.publish(twist)
-        s.close()
+                print 'Keep calm down and press slow!'+mess
+                flag = 1
+            for i in range(0, 50):
+                p.publish(twist)
+                rospy.sleep(0.1) 
+                if flag==1:
+                    break
+            # twist = Twist()
+            # p.publish(twist)
+    s.close()
 
 if __name__=="__main__":
     threads = []
