@@ -11,7 +11,7 @@ import os
 import numpy
 import cv2
 import select
-
+import time
 
 x_speed = 0.2
 
@@ -47,7 +47,7 @@ def cameraVideoGet(cli = '', port = 8002):
         decimg=cv2.imdecode(data,1)
         cv2.imshow('SERVER',decimg)
         cv2.waitKey(10)
-    s.close()
+    sock.close()
     cv2.destroyAllWindows() 
 
     
@@ -60,48 +60,46 @@ def controlGet(cli = '', port = 8003):
     s.listen(True)
     while 1:
         conn, addr = s.accept()
-        print 'client '+str(addr)+' just entered.'
-        rospy.init_node('move')
+        print '- Client '+str(addr)+' just connect.'
+        rospy.init_node('CutiesNode')
         p = rospy.Publisher('/mobile_base/commands/velocity', Twist,queue_size = 10)
-        flag = 0
         while(1):    
-            flag =0
             twist = Twist()
-            twist.linear.x = 0;                   # our forward speed
+            twist.linear.x = 0;                         # our forward speed
             twist.linear.y = 0; twist.linear.z = 0;     # we can't use these!        
             twist.angular.x = 0; twist.angular.y = 0;   #          or these!
             twist.angular.z = 0;                        # no rotation
             try:
-                mess = conn.recv(1024)
+                mess = conn.recv(1)
+                # print mess
             except:
-                print 'client auto close adds:' + str(addr)
+                print 'Auto disconnect to client:' + str(addr)
                 break
             if mess == 'w':
                 twist.linear.x = x_speed
+                print '[ INFO] ['+str(rospy.get_time())+'] KeyOp: linear Velocity incremented [0.2|0]'
             elif mess == 's':
                 twist.linear.x = -x_speed
+                print '[ INFO] ['+str(rospy.get_time())+'] KeyOp: linear Velocity decremented [0.2|0]'
             elif mess == 'a':
-                twist.angular.z = x_speed
+                twist.angular.z = x_speed*2
+                print '[ INFO] ['+str(rospy.get_time())+'] KeyOp: angular Velocity incremented [0|0.4]'
             elif mess == 'd':
-                twist.angular.z = -x_speed
+                twist.angular.z = -x_speed*2
+                print '[ INFO] ['+str(rospy.get_time())+'] KeyOp: angular Velocity decremented [0|-0.4]'
             elif mess == 'e':
                 sys.exit()
             else:
-                print 'Keep calm down and press slow!'+mess
-                flag = 1
-            for i in range(0, 50):
+                print 'Wrong key.'
+            for i in range(0, 2):
                 p.publish(twist)
-                rospy.sleep(0.1) 
-                if flag==1:
-                    break
-            # twist = Twist()
-            # p.publish(twist)
+                rospy.sleep(0.2) 
     s.close()
 
 if __name__=="__main__":
-    threads = []
-    t = threading.Thread(target=cameraVideoGet, args=())
-    t.setDaemon(True)
-    threads.append(t)
-    t.start()
+    # threads = []
+    # t = threading.Thread(target=cameraVideoGet, args=())
+    # t.setDaemon(True)
+    # threads.append(t)
+    # t.start()
     controlGet()
