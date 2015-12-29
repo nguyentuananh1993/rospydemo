@@ -1,4 +1,5 @@
 import socket
+import msvcrt
 
 TCP_IP = ''
 TCP_PORT = 8003

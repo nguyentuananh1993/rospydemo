@@ -1,5 +1,7 @@
 import socket
 import sys
+import msvcrt
+
 try:
     import tty, termios
 except ImportError:
@@ -35,13 +37,27 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
-TCP_IP = '192.168.1.102'
+TCP_IP = '127.0.0.1'
 TCP_PORT = 8003
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.connect((TCP_IP, TCP_PORT))
 while 1:
-	a = getch()
-	socket.send(a)
-	if a=='q':
-		break;
+    if msvcrt.kbhit():
+        keypress = ord(msvcrt.getch())
+        if keypress == 119 or keypress == 72:
+            print 'up'
+            socket.send('w')
+        if keypress == 115 or keypress == 80:
+            print 'down'
+            socket.send('s')
+        if keypress == 97 or keypress == 75:
+            print 'left'
+            socket.send('a')
+        if keypress == 100 or keypress == 77:
+            print 'right'
+            socket.send('d')
+        if keypress == 101:
+            print 'stop'
+            socket.send('q')
+            break
 socket.close()

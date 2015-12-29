@@ -10,7 +10,7 @@ import os
 import numpy
 import cv2
 
-x_speed = 1
+x_speed = 0.2
 
 def recvall(sock, count):
     buf = b''
@@ -61,17 +61,15 @@ def controlGet(cli = '', port = 8003):
     conn, addr = s.accept()
 
     rospy.init_node('move')
-    p = rospy.Publisher('/turtle1/cmd_vel', Twist,queue_size = 10)
+    p = rospy.Publisher('/mobile_base/commands/velocity', Twist,queue_size = 10)
 
-    twist = Twist()
-    twist.linear.x = 0;                   # our forward speed
-    twist.linear.y = 0; twist.linear.z = 0;     # we can't use these!        
-    twist.angular.x = 0; twist.angular.y = 0;   #          or these!
-    twist.angular.z = 0;                        # no rotation
-
-    print "w a s d quit press n"
-    while(1):
-
+    print "w a s d or arrow quit press n"
+    while(1):    
+        twist = Twist()
+        twist.linear.x = 0;                   # our forward speed
+        twist.linear.y = 0; twist.linear.z = 0;     # we can't use these!        
+        twist.angular.x = 0; twist.angular.y = 0;   #          or these!
+        twist.angular.z = 0;                        # no rotation
         mess = conn.recv(1024)
         if mess == 'w':
             twist.linear.x = x_speed
@@ -81,14 +79,12 @@ def controlGet(cli = '', port = 8003):
             twist.angular.z = x_speed
         elif mess == 'd':
             twist.angular.z = -x_speed
-        elif mess == 'n':
+        elif mess == 'e':
             sys.exit()
         else:
             print 'Keep calm down and press slow!'
-
-        for i in range(5):
-            p.publish(twist)
-            rospy.sleep(0.1) 
+        p.publish(twist)
+        rospy.sleep(0.1) 
         twist = Twist()
         p.publish(twist)
     s.close()
