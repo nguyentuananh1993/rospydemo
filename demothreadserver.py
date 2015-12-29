@@ -24,20 +24,33 @@ def recvall(sock, count):
 def cameraVideoGet(cli = '', port = 8002):
     TCP_IP = cli
     TCP_PORT = port
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((TCP_IP, TCP_PORT))
-    s.listen(True)
-    conn, addr = s.accept()
-    while 1:
-        length = recvall(conn,16)
-        stringData = recvall(conn, int(length))
-        data = numpy.fromstring(stringData, dtype='uint8')
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind((TCP_IP, TCP_PORT))
+    sock.listen(True)
+    conn, addr = sock.accept()
+
+    # camera
+    capture = cv2.VideoCapture(0)
+    ret, frame = capture.read()
+    encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),90]
+
+    while ret:
+        result, imgencode = cv2.imencode('.jpg', frame, encode_param)
+        data = numpy.array(imgencode)
+        stringData = data.tostring()
+        conn.send( str(len(stringData)).ljust(16));
+        conn.send( stringData );
+        ret, frame = capture.read()
         decimg=cv2.imdecode(data,1)
         cv2.imshow('SERVER',decimg)
         cv2.waitKey(10)
     s.close()
     cv2.destroyAllWindows() 
 
+def makeVideoRequest(cli, port = 8002, cameraDevice = 0):
+    TCP_IP = cli
+    TCP_PORT = port
+    
 def controlGet(cli = '', port = 8003):
     # initial socket
     TCP_IP = cli
@@ -48,7 +61,7 @@ def controlGet(cli = '', port = 8003):
     conn, addr = s.accept()
 
     rospy.init_node('move')
-    p = rospy.Publisher('/turtle1/cmd_vel', Twist,queue_size=10)
+    p = rospy.Publisher('/turtle1/cmd_vel', Twist,queue_size = 10)
 
     twist = Twist()
     twist.linear.x = 0;                   # our forward speed

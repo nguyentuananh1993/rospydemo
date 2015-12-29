@@ -40,26 +40,31 @@ else:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
 
+def recvall(sock, count):
+    buf = b''
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
 def makeVideoRequest(cli, port=8002):
-	TCP_IP = cli
-	TCP_PORT = port
-	sock = socket.socket()
-	capture = cv2.VideoCapture(0)
-	ret, frame = capture.read()
-	sock.connect((TCP_IP, TCP_PORT))
-	encode_param=[int(cv2.IMWRITE_JPEG_QUALITY),90]
-	while ret:
-	    result, imgencode = cv2.imencode('.jpg', frame, encode_param)
-	    data = numpy.array(imgencode)
-	    stringData = data.tostring()
-	    sock.send( str(len(stringData)).ljust(16));
-	    sock.send( stringData );
-	    ret, frame = capture.read()
-	    decimg=cv2.imdecode(data,1)
-	    cv2.imshow('CLIENT',decimg)
-	    cv2.waitKey(10)
-	sock.close()
-	cv2.destroyAllWindows() 
+    TCP_IP = cli
+    TCP_PORT = port
+    sock = socket.socket()
+    sock.connect((TCP_IP, TCP_PORT))
+
+    while 1:
+        length = recvall(sock,16)
+        stringData = recvall(sock, int(length))
+        data = numpy.fromstring(stringData, dtype='uint8')
+        decimg=cv2.imdecode(data,1)
+        cv2.imshow('CLIENT',decimg)
+        cv2.waitKey(10)
+    sock.close()
+    cv2.destroyAllWindows() 
+
 
 def makeRequest(cli, port=8003):
 	TCP_IP = cli
@@ -73,12 +78,13 @@ def makeRequest(cli, port=8003):
 			sys.exit()
 	sock.close()
 if __name__ == '__main__':
+	ipadds = '192.168.1.1'
 	print 'Move by using w,a,s,d. press n to close.'
 	threads = []
-	t = threading.Thread(target=makeVideoRequest, args=("192.168.1.102",))
+	t = threading.Thread(target=makeVideoRequest, args=(ipadds,))
 	t.setDaemon(True)
 	threads.append(t)
 	t.start()
-	t = threading.Thread(target=makeRequest, args=("192.168.1.102",))
+	t = threading.Thread(target=makeRequest, args=(ipadds,))
 	threads.append(t)
 	t.start()
