@@ -47,9 +47,6 @@ def cameraVideoGet(cli = '', port = 8002):
     s.close()
     cv2.destroyAllWindows() 
 
-def makeVideoRequest(cli, port = 8002, cameraDevice = 0):
-    TCP_IP = cli
-    TCP_PORT = port
     
 def controlGet(cli = '', port = 8003):
     # initial socket
@@ -58,36 +55,37 @@ def controlGet(cli = '', port = 8003):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
     s.listen(True)
-    conn, addr = s.accept()
+    while 1:
+        conn, addr = s.accept()
 
-    rospy.init_node('move')
-    p = rospy.Publisher('/mobile_base/commands/velocity', Twist,queue_size = 10)
-
-    print "w a s d or arrow quit press n"
-    while(1):    
-        twist = Twist()
-        twist.linear.x = 0;                   # our forward speed
-        twist.linear.y = 0; twist.linear.z = 0;     # we can't use these!        
-        twist.angular.x = 0; twist.angular.y = 0;   #          or these!
-        twist.angular.z = 0;                        # no rotation
-        mess = conn.recv(1024)
-        if mess == 'w':
-            twist.linear.x = x_speed
-        elif mess == 's':
-            twist.linear.x = -x_speed
-        elif mess == 'a':
-            twist.angular.z = x_speed
-        elif mess == 'd':
-            twist.angular.z = -x_speed
-        elif mess == 'e':
-            sys.exit()
-        else:
-            print 'Keep calm down and press slow!'
-        p.publish(twist)
-        rospy.sleep(0.1) 
-        twist = Twist()
-        p.publish(twist)
-    s.close()
+        rospy.init_node('move')
+        p = rospy.Publisher('/mobile_base/commands/velocity', Twist,queue_size = 10)
+        print 'connect from ' + addr
+        # print "w a s d or arrow quit press n"
+        while(1):    
+            twist = Twist()
+            twist.linear.x = 0;                   # our forward speed
+            twist.linear.y = 0; twist.linear.z = 0;     # we can't use these!        
+            twist.angular.x = 0; twist.angular.y = 0;   #          or these!
+            twist.angular.z = 0;                        # no rotation
+            mess = conn.recv(1024)
+            if mess == 'w':
+                twist.linear.x = x_speed
+            elif mess == 's':
+                twist.linear.x = -x_speed
+            elif mess == 'a':
+                twist.angular.z = x_speed
+            elif mess == 'd':
+                twist.angular.z = -x_speed
+            elif mess == 'e':
+                sys.exit()
+            else:
+                print 'Keep calm down and press slow!'
+            p.publish(twist)
+            rospy.sleep(0.1) 
+            twist = Twist()
+            p.publish(twist)
+        s.close()
 
 if __name__=="__main__":
     threads = []
