@@ -74,7 +74,7 @@ def makeRequest(cli, port=8003):
 				sock.send('e')
 				sys.exit()
 			if keyenter != '':
-				print inputlist
+				# print inputlist
 				inputlist = []
 				inputlist.append(keyenter)
 	sock.close()
@@ -82,9 +82,9 @@ def makeRequest(cli, port=8003):
 if __name__ == '__main__':
 	ipadds = '192.168.0.107'
 	print 'Move by using w,a,s,d. press e to closee.'
-	threads = []
-	t = threading.Thread(target=makeVideoRequest, args=(ipadds,))
-	t.setDaemon(True)
-	threads.append(t)
-	t.start()
+	# threads = []
+	# t = threading.Thread(target=makeVideoRequest, args=(ipadds,))
+	# t.setDaemon(True)
+	# threads.append(t)
+	# t.start()
 	makeRequest(ipadds)
