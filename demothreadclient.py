@@ -40,7 +40,7 @@ def sendMessage(sock):
 	while 1:
 		if len(inputlist) != 0 :
 			sock.send(inputlist.pop())
-			time.sleep(1)
+			time.sleep(0.5)
 
 def makeRequest(cli, port=8003):
 	threadlist = []
@@ -80,11 +80,12 @@ def makeRequest(cli, port=8003):
 	sock.close()
 
 if __name__ == '__main__':
-	ipadds = '192.168.0.107'
+	ipadds = '192.168.43.97'
 	print 'Move by using w,a,s,d. press e to closee.'
-	# threads = []
-	# t = threading.Thread(target=makeVideoRequest, args=(ipadds,))
-	# t.setDaemon(True)
-	# threads.append(t)
-	# t.start()
+	# makeVideoRequest(ipadds)
+	threads = []
+	t = threading.Thread(target=makeVideoRequest, args=(ipadds,))
+	t.setDaemon(True)
+	threads.append(t)
+	t.start()
 	makeRequest(ipadds)
