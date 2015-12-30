@@ -15,6 +15,7 @@ import time
 
 x_speed = 0.15
 
+
 def recvall(sock, count):
     buf = b''
     while count:
@@ -97,9 +98,9 @@ def controlGet(cli = '', port = 8003):
     s.close()
 
 if __name__=="__main__":
-    threads = []
-    t = threading.Thread(target=cameraVideoGet, args=())
-    t.setDaemon(True)
-    threads.append(t)
-    t.start()
+    # threads = []
+    # t = threading.Thread(target=cameraVideoGet, args=())
+    # t.setDaemon(True)
+    # threads.append(t)
+    # t.start()
     controlGet()
